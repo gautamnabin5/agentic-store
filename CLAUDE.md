@@ -113,6 +113,7 @@ VITE_API_BASE_URL=http://localhost:8080
 - TypeScript strict mode on
 
 ### Backend
+- Architecture must follow SOLID principles — single responsibility per class, dependencies injected via interfaces, open for extension without modifying existing classes
 - Standard Spring layering: `controller` → `service` → `repository`
 - DTOs in `dto/`, entities in `model/` or `entity/`
 - REST endpoints under `/api/v1/`
