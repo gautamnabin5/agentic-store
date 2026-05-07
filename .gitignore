@@ -46,6 +46,9 @@ desktop.ini
 # ---- Docker ----
 docker/postgres-data/
 
+# ---- Superpowers / Visual Companion ----
+.superpowers/
+
 # ---- Logs ----
 *.log
 logs/
