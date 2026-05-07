@@ -34,11 +34,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
         String token = header.substring(7);
-        if (!jwtUtil.isTokenValid(token)) {
+        Claims claims;
+        try {
+            claims = jwtUtil.parseToken(token);
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
             chain.doFilter(request, response);
             return;
         }
-        Claims claims = jwtUtil.parseToken(token);
         UUID userId = UUID.fromString(claims.getSubject());
         String role = claims.get("role", String.class);
         UserPrincipal principal = new UserPrincipal(userId, claims.get("email", String.class), role);
