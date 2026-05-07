@@ -38,7 +38,7 @@ class AuthServiceTest {
             "test-secret-key-that-is-long-enough-for-hmac-sha256-algorithm",
             86400000L
         );
-        authService = new AuthService(userRepository, passwordEncoder, jwtUtil);
+        authService = new AuthServiceImpl(userRepository, passwordEncoder, jwtUtil);
     }
 
     @Test
