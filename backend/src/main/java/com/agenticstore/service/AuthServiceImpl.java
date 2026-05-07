@@ -10,6 +10,7 @@ import com.agenticstore.repository.UserRepository;
 import com.agenticstore.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -25,6 +26,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public Result<AuthResponse> register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             return Result.failure("Email already in use", 409);

@@ -8,11 +8,9 @@ import com.agenticstore.entity.User;
 import com.agenticstore.entity.UserRole;
 import com.agenticstore.repository.UserRepository;
 import com.agenticstore.security.JwtUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -22,18 +20,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-    @Mock UserRepository userRepository;
-    @Mock PasswordEncoder passwordEncoder;
+    UserRepository userRepository = Mockito.mock(UserRepository.class);
+    PasswordEncoder passwordEncoder = Mockito.mock(PasswordEncoder.class);
+    JwtUtil jwtUtil;
+    AuthService authService;
 
-    private JwtUtil jwtUtil;
-    private AuthService authService;
-
-    @org.junit.jupiter.api.BeforeEach
+    @BeforeEach
     void setUp() {
-        // Create a real JwtUtil instance with test values
         jwtUtil = new JwtUtil(
             "test-secret-key-that-is-long-enough-for-hmac-sha256-algorithm",
             86400000L
