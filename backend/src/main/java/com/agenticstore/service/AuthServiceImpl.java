@@ -39,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
 
         User saved = userRepository.save(user);
         String token = jwtUtil.generateToken(saved.getId(), saved.getEmail(), saved.getRole().name());
-        return Result.success(new AuthResponse(token));
+        return Result.created(new AuthResponse(token));
     }
 
     @Override
@@ -48,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
                 .filter(u -> passwordEncoder.matches(request.password(), u.getPasswordHash()))
                 .map(u -> {
                     String token = jwtUtil.generateToken(u.getId(), u.getEmail(), u.getRole().name());
-                    return Result.<AuthResponse>success(new AuthResponse(token));
+                    return Result.<AuthResponse>ok(new AuthResponse(token));
                 })
                 .orElseGet(() -> Result.failure("Invalid credentials", 401));
     }

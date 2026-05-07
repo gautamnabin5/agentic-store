@@ -81,7 +81,7 @@ public class OrderService {
             order.getItems().add(item);
         });
 
-        return Result.success(OrderResponse.from(orderRepository.save(order)));
+        return Result.created(OrderResponse.from(orderRepository.save(order)));
     }
 
     public List<OrderResponse> listForUser(UUID userId) {
@@ -95,7 +95,7 @@ public class OrderService {
                     if (!order.getUser().getId().equals(userId)) {
                         return Result.<OrderResponse>failure("Forbidden", 403);
                     }
-                    return Result.<OrderResponse>success(OrderResponse.from(order));
+                    return Result.<OrderResponse>ok(OrderResponse.from(order));
                 })
                 .orElseGet(() -> Result.failure("Order not found", 404));
     }
@@ -107,7 +107,7 @@ public class OrderService {
 
     public Result<OrderResponse> getAny(UUID orderId) {
         return orderRepository.findById(orderId)
-                .map(o -> Result.<OrderResponse>success(OrderResponse.from(o)))
+                .map(o -> Result.<OrderResponse>ok(OrderResponse.from(o)))
                 .orElseGet(() -> Result.failure("Order not found", 404));
     }
 }

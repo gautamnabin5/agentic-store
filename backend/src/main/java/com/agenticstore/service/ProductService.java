@@ -27,7 +27,7 @@ public class ProductService {
 
     public Result<ProductResponse> getById(UUID id) {
         return productRepository.findById(id)
-                .map(p -> Result.<ProductResponse>success(ProductResponse.from(p)))
+                .map(p -> Result.<ProductResponse>ok(ProductResponse.from(p)))
                 .orElseGet(() -> Result.failure("Product not found", 404));
     }
 
@@ -39,7 +39,7 @@ public class ProductService {
                 .price(request.price())
                 .stockQuantity(request.stockQuantity())
                 .build();
-        return Result.success(ProductResponse.from(productRepository.save(product)));
+        return Result.created(ProductResponse.from(productRepository.save(product)));
     }
 
     @Transactional
@@ -50,7 +50,7 @@ public class ProductService {
                     p.setDescription(request.description());
                     p.setPrice(request.price());
                     p.setStockQuantity(request.stockQuantity());
-                    return Result.<ProductResponse>success(ProductResponse.from(productRepository.save(p)));
+                    return Result.<ProductResponse>ok(ProductResponse.from(productRepository.save(p)));
                 })
                 .orElseGet(() -> Result.failure("Product not found", 404));
     }
@@ -61,7 +61,7 @@ public class ProductService {
                 .map(p -> {
                     p.setActive(false);
                     productRepository.save(p);
-                    return Result.<Void>success(null);
+                    return Result.<Void>noContent();
                 })
                 .orElseGet(() -> Result.failure("Product not found", 404));
     }
