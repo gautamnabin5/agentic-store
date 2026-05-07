@@ -16,6 +16,9 @@ agentic-store/
 ├── frontend/          # React + Vite + shadcn/ui
 ├── backend/           # Spring Boot (Maven or Gradle)
 ├── docker/            # Shared Docker assets (init SQL, nginx config, etc.)
+├── docs/
+│   ├── specs/         # Design specs — one file per feature/domain, named YYYY-MM-DD-<topic>-design.md
+│   └── plans/         # Implementation plans — one file per feature, named YYYY-MM-DD-<topic>-plan.md
 ├── docker-compose.yml # Orchestrates all services locally
 └── CLAUDE.md
 ```
@@ -173,6 +176,16 @@ Visually group what belongs together. Related controls sit close to each other; 
 
 ### 7. Alignment
 Use a grid. Everything aligns to something. Consistent spacing scale (Tailwind's spacing system) — avoid arbitrary pixel values. Clean alignment signals professionalism and makes layouts predictable.
+
+## Documentation Conventions
+
+All design and planning documents live in `docs/` and are committed to git.
+
+- **Before implementing any non-trivial feature**: check `docs/specs/` for an existing spec. If none exists, create one before writing code.
+- **Specs** (`docs/specs/YYYY-MM-DD-<topic>-design.md`): capture the *what* and *why* — data model, API surface, business rules, constraints, out-of-scope decisions.
+- **Plans** (`docs/plans/YYYY-MM-DD-<topic>-plan.md`): capture the *how* — ordered implementation steps, file targets, migration names, test strategy.
+- Keep docs up to date as decisions change. A stale doc is worse than no doc — update or delete it.
+- Do not write ephemeral notes or task lists into `docs/`; those belong in the conversation or a task tracker.
 
 ## Notes for AI Agents
 
