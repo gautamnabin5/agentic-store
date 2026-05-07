@@ -52,3 +52,6 @@ docker/postgres-data/
 # ---- Logs ----
 *.log
 logs/
+
+# ---- Docs / Plans ----
+docs/plans/

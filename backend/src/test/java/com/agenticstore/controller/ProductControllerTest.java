@@ -49,7 +49,7 @@ class ProductControllerTest {
     @Test
     void getProduct_withExistingId_returns200() throws Exception {
         UUID id = UUID.randomUUID();
-        when(productService.getById(id)).thenReturn(Result.success(sampleResponse(id)));
+        when(productService.getById(id)).thenReturn(Result.ok(sampleResponse(id)));
 
         mockMvc.perform(get("/api/v1/products/{id}", id))
                 .andExpect(status().isOk())
@@ -69,7 +69,7 @@ class ProductControllerTest {
     @Test
     void createProduct_withValidBody_returns201() throws Exception {
         UUID id = UUID.randomUUID();
-        when(productService.create(any())).thenReturn(Result.success(sampleResponse(id)));
+        when(productService.create(any())).thenReturn(Result.created(sampleResponse(id)));
 
         mockMvc.perform(post("/api/v1/products")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -83,7 +83,7 @@ class ProductControllerTest {
     @Test
     void deleteProduct_withExistingId_returns204() throws Exception {
         UUID id = UUID.randomUUID();
-        when(productService.softDelete(id)).thenReturn(Result.success(null));
+        when(productService.softDelete(id)).thenReturn(Result.noContent());
 
         mockMvc.perform(delete("/api/v1/products/{id}", id))
                 .andExpect(status().isNoContent());

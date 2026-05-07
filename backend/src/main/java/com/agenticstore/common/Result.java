@@ -14,7 +14,6 @@ public sealed interface Result<T> permits Result.Success, Result.Failure {
         return new Success<>(value, 201);
     }
 
-    @SuppressWarnings("unchecked")
     static <T> Result<T> noContent() {
         return new Success<>(null, 204);
     }

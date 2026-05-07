@@ -38,12 +38,11 @@ class OrderControllerTest {
     @MockBean JwtUtil jwtUtil;
 
     private UUID userId;
-    private UserPrincipal principal;
 
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        principal = new UserPrincipal(userId, "user@example.com", "CUSTOMER");
+        var principal = new UserPrincipal(userId, "user@example.com", "CUSTOMER");
         var auth = new UsernamePasswordAuthenticationToken(
                 principal, null, List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER")));
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -63,7 +62,7 @@ class OrderControllerTest {
     void placeOrder_withValidBody_returns201() throws Exception {
         UUID orderId = UUID.randomUUID();
         when(orderService.placeOrder(eq(userId), any()))
-                .thenReturn(Result.success(sampleOrder(orderId)));
+                .thenReturn(Result.created(sampleOrder(orderId)));
 
         mockMvc.perform(post("/api/v1/orders")
                         .contentType(MediaType.APPLICATION_JSON)
