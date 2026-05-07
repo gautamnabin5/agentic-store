@@ -38,8 +38,6 @@ class OrderServiceTest {
         user = User.builder()
                 .id(userId).email("user@example.com")
                 .name("Alice").role(UserRole.CUSTOMER).build();
-        // Reset mocks between tests
-        reset(orderRepository, productRepository, userRepository);
     }
 
     private Product buildProduct(int stock, boolean active) {
@@ -61,7 +59,6 @@ class OrderServiceTest {
         UUID productId = product.getId();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-        when(productRepository.save(any())).thenReturn(product);
         when(orderRepository.save(any())).thenReturn(buildSavedOrder(user, new BigDecimal("39.98")));
 
         PlaceOrderRequest request = new PlaceOrderRequest(
@@ -70,7 +67,7 @@ class OrderServiceTest {
 
         assertInstanceOf(Result.Success.class, result);
         assertEquals(8, product.getStockQuantity());
-        verify(productRepository).save(product);
+        verify(productRepository, never()).save(any());
     }
 
     @Test
@@ -110,7 +107,6 @@ class OrderServiceTest {
         UUID productId = product.getId();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-        when(productRepository.save(any())).thenReturn(product);
 
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
             Order o = inv.getArgument(0);

@@ -39,19 +39,29 @@ public class OrderService {
             return Result.failure("User not found", 404);
         }
 
-        List<OrderItem> items = new ArrayList<>();
-        BigDecimal total = BigDecimal.ZERO;
-
+        // Pass 1: validate all items before touching stock
+        List<Product> products = new ArrayList<>();
         for (var itemReq : request.items()) {
             Product product = productRepository.findById(itemReq.productId()).orElse(null);
             if (product == null || !product.isActive()) {
-                return Result.failure("Product not found: " + itemReq.productId(), 404);
+                return Result.failure("Product not found or unavailable", 404);
             }
             if (product.getStockQuantity() < itemReq.quantity()) {
                 return Result.failure("Insufficient stock for: " + product.getName(), 422);
             }
+            products.add(product);
+        }
+
+        // Pass 2: decrement stock and build items
+        List<OrderItem> items = new ArrayList<>();
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (int i = 0; i < request.items().size(); i++) {
+            var itemReq = request.items().get(i);
+            Product product = products.get(i);
+
             product.setStockQuantity(product.getStockQuantity() - itemReq.quantity());
-            productRepository.save(product);
+            // No explicit save needed — JPA dirty-checking handles this within the transaction
 
             items.add(OrderItem.builder()
                     .product(product)
