@@ -48,7 +48,7 @@ class AdminOrderControllerTest {
     void getById_withExistingOrder_returns200() throws Exception {
         UUID orderId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        when(orderService.getAny(orderId)).thenReturn(Result.success(sampleOrder(orderId, userId)));
+        when(orderService.getAny(orderId)).thenReturn(Result.ok(sampleOrder(orderId, userId)));
 
         mockMvc.perform(get("/api/v1/admin/orders/{id}", orderId))
                 .andExpect(status().isOk())

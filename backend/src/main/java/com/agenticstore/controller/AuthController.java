@@ -6,10 +6,7 @@ import com.agenticstore.dto.auth.LoginRequest;
 import com.agenticstore.dto.auth.RegisterRequest;
 import com.agenticstore.service.AuthService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -22,18 +19,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
-        return switch (authService.register(request)) {
-            case Result.Success<AuthResponse> s -> ResponseEntity.status(201).body(s.value());
-            case Result.Failure<AuthResponse> f -> ResponseEntity.status(f.httpStatus()).body(Map.of("error", f.error()));
-        };
+    public Result<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return authService.register(request);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        return switch (authService.login(request)) {
-            case Result.Success<AuthResponse> s -> ResponseEntity.ok(s.value());
-            case Result.Failure<AuthResponse> f -> ResponseEntity.status(f.httpStatus()).body(Map.of("error", f.error()));
-        };
+    public Result<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 }

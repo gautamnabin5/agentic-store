@@ -26,7 +26,7 @@ class AuthControllerTest {
 
     @Test
     void register_withValidBody_returns201WithToken() throws Exception {
-        when(authService.register(any())).thenReturn(Result.success(new AuthResponse("my.jwt.token")));
+        when(authService.register(any())).thenReturn(Result.created(new AuthResponse("my.jwt.token")));
 
         mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -52,7 +52,7 @@ class AuthControllerTest {
 
     @Test
     void login_withValidCredentials_returns200WithToken() throws Exception {
-        when(authService.login(any())).thenReturn(Result.success(new AuthResponse("my.jwt.token")));
+        when(authService.login(any())).thenReturn(Result.ok(new AuthResponse("my.jwt.token")));
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

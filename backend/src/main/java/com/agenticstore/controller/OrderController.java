@@ -6,12 +6,10 @@ import com.agenticstore.dto.order.PlaceOrderRequest;
 import com.agenticstore.security.UserPrincipal;
 import com.agenticstore.service.OrderService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -25,13 +23,10 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<?> placeOrder(
+    public Result<OrderResponse> placeOrder(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody PlaceOrderRequest request) {
-        return switch (orderService.placeOrder(principal.id(), request)) {
-            case Result.Success<OrderResponse> s -> ResponseEntity.status(201).body(s.value());
-            case Result.Failure<OrderResponse> f -> ResponseEntity.status(f.httpStatus()).body(Map.of("error", f.error()));
-        };
+        return orderService.placeOrder(principal.id(), request);
     }
 
     @GetMapping
@@ -40,12 +35,9 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getOwn(
+    public Result<OrderResponse> getOwn(
             @PathVariable UUID id,
             @AuthenticationPrincipal UserPrincipal principal) {
-        return switch (orderService.getForUser(id, principal.id())) {
-            case Result.Success<OrderResponse> s -> ResponseEntity.ok(s.value());
-            case Result.Failure<OrderResponse> f -> ResponseEntity.status(f.httpStatus()).body(Map.of("error", f.error()));
-        };
+        return orderService.getForUser(id, principal.id());
     }
 }

@@ -17,8 +17,8 @@ agentic-store/
 ├── backend/           # Spring Boot (Maven or Gradle)
 ├── docker/            # Shared Docker assets (init SQL, nginx config, etc.)
 ├── docs/
-│   ├── specs/         # Design specs — one file per feature/domain, named YYYY-MM-DD-<topic>-design.md
-│   └── plans/         # Implementation plans — one file per feature, named YYYY-MM-DD-<topic>-plan.md
+│   ├── specs/         # Design specs — one file per feature/domain, named YYYY-MM-DD-<topic>-design.md. This is committed to source control so new/exsting features can reference it for knowledge / memory 
+│   └── plans/         # Implementation plans — one file per feature, named YYYY-MM-DD-<topic>-plan.md. Do not reference this if the plan is unrelated to what is currently being built. Use the specs files for that since this is not in git history
 ├── docker-compose.yml # Orchestrates all services locally
 └── CLAUDE.md
 ```

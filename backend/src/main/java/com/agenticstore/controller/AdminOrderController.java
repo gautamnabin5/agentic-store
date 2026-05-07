@@ -3,11 +3,9 @@ package com.agenticstore.controller;
 import com.agenticstore.common.Result;
 import com.agenticstore.dto.order.OrderResponse;
 import com.agenticstore.service.OrderService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -26,10 +24,7 @@ public class AdminOrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable UUID id) {
-        return switch (orderService.getAny(id)) {
-            case Result.Success<OrderResponse> s -> ResponseEntity.ok(s.value());
-            case Result.Failure<OrderResponse> f -> ResponseEntity.status(f.httpStatus()).body(Map.of("error", f.error()));
-        };
+    public Result<OrderResponse> getById(@PathVariable UUID id) {
+        return orderService.getAny(id);
     }
 }
