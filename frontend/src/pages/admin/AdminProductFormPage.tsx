@@ -12,9 +12,9 @@ import { ChevronLeft } from 'lucide-react'
 
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
-  description: z.string().optional().default(''),
-  price: z.coerce.number().positive('Price must be greater than 0'),
-  stockQuantity: z.coerce.number().int('Must be a whole number').min(0, 'Cannot be negative'),
+  description: z.string(),
+  price: z.number().positive('Price must be greater than 0'),
+  stockQuantity: z.number().int('Must be a whole number').min(0, 'Cannot be negative'),
 })
 type FormValues = z.infer<typeof schema>
 
@@ -30,7 +30,10 @@ export default function AdminProductFormPage() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) })
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { description: '' },
+  })
 
   useEffect(() => {
     if (!isEdit) return
@@ -95,12 +98,12 @@ export default function AdminProductFormPage() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="price">Price ($)</Label>
-            <Input id="price" type="number" step="0.01" min="0.01" {...register('price')} />
+            <Input id="price" type="number" step="0.01" min="0.01" {...register('price', { valueAsNumber: true })} />
             {errors.price && <p className="text-destructive text-xs">{errors.price.message}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="stockQuantity">Stock quantity</Label>
-            <Input id="stockQuantity" type="number" min="0" step="1" {...register('stockQuantity')} />
+            <Input id="stockQuantity" type="number" min="0" step="1" {...register('stockQuantity', { valueAsNumber: true })} />
             {errors.stockQuantity && (
               <p className="text-destructive text-xs">{errors.stockQuantity.message}</p>
             )}

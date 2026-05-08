@@ -3,13 +3,14 @@ import { Outlet, Link, useNavigate } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useCartStore } from '@/store/cartStore'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 import CartDrawer from '@/components/cart/CartDrawer'
 
 export default function StorefrontLayout() {
@@ -43,19 +44,17 @@ export default function StorefrontLayout() {
           <div className="flex items-center gap-2">
             {!token ? (
               <>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/login">Login</Link>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
+                  Login
                 </Button>
-                <Button size="sm" asChild>
-                  <Link to="/register">Register</Link>
+                <Button size="sm" onClick={() => navigate('/register')}>
+                  Register
                 </Button>
               </>
             ) : (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="max-w-[180px] truncate">
-                    {user?.email}
-                  </Button>
+                <DropdownMenuTrigger className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'max-w-[180px] truncate')}>
+                  {user?.email}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {user?.role === 'ADMIN' && (
