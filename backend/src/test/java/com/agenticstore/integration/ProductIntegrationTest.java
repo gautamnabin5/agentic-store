@@ -7,27 +7,32 @@ import com.agenticstore.repository.OrderRepository;
 import com.agenticstore.repository.ProductRepository;
 import com.agenticstore.repository.UserRepository;
 import com.agenticstore.security.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
+@AutoConfigureMockMvc
 @Import(TestcontainersConfig.class)
 class ProductIntegrationTest {
 
-    @Autowired TestRestTemplate restTemplate;
+    @Autowired MockMvc mockMvc;
+    @Autowired ObjectMapper objectMapper;
     @Autowired UserRepository userRepository;
     @Autowired ProductRepository productRepository;
     @Autowired OrderRepository orderRepository;
@@ -59,152 +64,169 @@ class ProductIntegrationTest {
         userRepository.deleteAll();
     }
 
-    private HttpHeaders bearerHeaders(String token) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
-    }
-
     private Map<String, Object> productBody(String name, double price, int stock) {
         return Map.of("name", name, "price", price, "stockQuantity", stock);
     }
 
     @Test
-    void listProducts_withoutAuth_returns200() {
-        ResponseEntity<List> resp = restTemplate.getForEntity("/api/v1/products", List.class);
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
-        assertNotNull(resp.getBody());
+    void listProducts_withoutAuth_returns200() throws Exception {
+        mockMvc.perform(get("/api/v1/products"))
+            .andExpect(status().isOk());
     }
 
     @Test
-    void listProducts_returnsCreatedProducts() {
-        var entity = new HttpEntity<>(productBody("Visible Product", 19.99, 5), bearerHeaders(adminToken));
-        restTemplate.exchange("/api/v1/products", HttpMethod.POST, entity, Map.class);
+    void listProducts_returnsCreatedProducts() throws Exception {
+        mockMvc.perform(post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminToken)
+                .content(objectMapper.writeValueAsString(productBody("Visible Product", 19.99, 5))))
+            .andExpect(status().isCreated());
 
-        ResponseEntity<List> resp = restTemplate.getForEntity("/api/v1/products", List.class);
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
-        assertFalse(resp.getBody().isEmpty());
+        mockMvc.perform(get("/api/v1/products"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
     }
 
     @Test
-    void createProduct_withoutAuth_returns401() {
-        var entity = new HttpEntity<>(productBody("Widget", 9.99, 10));
-        ResponseEntity<Map> resp = restTemplate.exchange("/api/v1/products", HttpMethod.POST, entity, Map.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
+    void createProduct_withoutAuth_returns401() throws Exception {
+        mockMvc.perform(post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(productBody("Widget", 9.99, 10))))
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void createProduct_asCustomer_returns403() {
-        var entity = new HttpEntity<>(productBody("Widget", 9.99, 10), bearerHeaders(customerToken));
-        ResponseEntity<Map> resp = restTemplate.exchange("/api/v1/products", HttpMethod.POST, entity, Map.class);
-        assertEquals(HttpStatus.FORBIDDEN, resp.getStatusCode());
+    void createProduct_asCustomer_returns403() throws Exception {
+        mockMvc.perform(post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + customerToken)
+                .content(objectMapper.writeValueAsString(productBody("Widget", 9.99, 10))))
+            .andExpect(status().isForbidden());
     }
 
     @Test
-    void createProduct_asAdmin_returns201WithProductData() {
-        var entity = new HttpEntity<>(productBody("Gadget Pro", 49.99, 20), bearerHeaders(adminToken));
-        ResponseEntity<Map> resp = restTemplate.exchange("/api/v1/products", HttpMethod.POST, entity, Map.class);
-
-        assertEquals(HttpStatus.CREATED, resp.getStatusCode());
-        assertNotNull(resp.getBody());
-        assertNotNull(resp.getBody().get("id"));
-        assertEquals("Gadget Pro", resp.getBody().get("name"));
-        assertEquals(20, resp.getBody().get("stockQuantity"));
-        assertEquals(true, resp.getBody().get("active"));
+    void createProduct_asAdmin_returns201WithProductData() throws Exception {
+        mockMvc.perform(post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminToken)
+                .content(objectMapper.writeValueAsString(productBody("Gadget Pro", 49.99, 20))))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").isNotEmpty())
+            .andExpect(jsonPath("$.name").value("Gadget Pro"))
+            .andExpect(jsonPath("$.stockQuantity").value(20))
+            .andExpect(jsonPath("$.active").value(true));
     }
 
     @Test
-    void createProduct_withMissingName_returns400() {
+    void createProduct_withMissingName_returns400() throws Exception {
         var body = Map.of("price", 9.99, "stockQuantity", 5);
-        var entity = new HttpEntity<>(body, bearerHeaders(adminToken));
-        ResponseEntity<Map> resp = restTemplate.exchange("/api/v1/products", HttpMethod.POST, entity, Map.class);
-        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+        mockMvc.perform(post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminToken)
+                .content(objectMapper.writeValueAsString(body)))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
-    void createProduct_withNegativeStock_returns400() {
+    void createProduct_withNegativeStock_returns400() throws Exception {
         var body = Map.of("name", "Bad Stock", "price", 9.99, "stockQuantity", -1);
-        var entity = new HttpEntity<>(body, bearerHeaders(adminToken));
-        ResponseEntity<Map> resp = restTemplate.exchange("/api/v1/products", HttpMethod.POST, entity, Map.class);
-        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+        mockMvc.perform(post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminToken)
+                .content(objectMapper.writeValueAsString(body)))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
-    void getProduct_returnsProductDetails() {
-        var entity = new HttpEntity<>(productBody("Detail Product", 19.99, 10), bearerHeaders(adminToken));
-        ResponseEntity<Map> createResp = restTemplate.exchange("/api/v1/products", HttpMethod.POST, entity, Map.class);
-        String id = (String) createResp.getBody().get("id");
+    void getProduct_returnsProductDetails() throws Exception {
+        var createResp = mockMvc.perform(post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminToken)
+                .content(objectMapper.writeValueAsString(productBody("Detail Product", 19.99, 10))))
+            .andExpect(status().isCreated())
+            .andReturn();
+        String id = objectMapper.readTree(createResp.getResponse().getContentAsString()).get("id").asText();
 
-        ResponseEntity<Map> getResp = restTemplate.getForEntity("/api/v1/products/" + id, Map.class);
-        assertEquals(HttpStatus.OK, getResp.getStatusCode());
-        assertEquals("Detail Product", getResp.getBody().get("name"));
+        mockMvc.perform(get("/api/v1/products/" + id))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("Detail Product"));
     }
 
     @Test
-    void getProduct_withNonExistentId_returns404() {
-        ResponseEntity<Map> resp = restTemplate.getForEntity(
-            "/api/v1/products/" + UUID.randomUUID(), Map.class);
-        assertEquals(HttpStatus.NOT_FOUND, resp.getStatusCode());
+    void getProduct_withNonExistentId_returns404() throws Exception {
+        mockMvc.perform(get("/api/v1/products/" + UUID.randomUUID()))
+            .andExpect(status().isNotFound());
     }
 
     @Test
-    void updateProduct_asAdmin_returns200WithUpdatedData() {
-        var entity = new HttpEntity<>(productBody("Original Name", 10.00, 5), bearerHeaders(adminToken));
-        ResponseEntity<Map> createResp = restTemplate.exchange("/api/v1/products", HttpMethod.POST, entity, Map.class);
-        String id = (String) createResp.getBody().get("id");
+    void updateProduct_asAdmin_returns200WithUpdatedData() throws Exception {
+        var createResp = mockMvc.perform(post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminToken)
+                .content(objectMapper.writeValueAsString(productBody("Original Name", 10.00, 5))))
+            .andExpect(status().isCreated())
+            .andReturn();
+        String id = objectMapper.readTree(createResp.getResponse().getContentAsString()).get("id").asText();
 
         var updateBody = Map.of("name", "Updated Name", "price", 25.00, "stockQuantity", 15);
-        var updateEntity = new HttpEntity<>(updateBody, bearerHeaders(adminToken));
-        ResponseEntity<Map> updateResp = restTemplate.exchange(
-            "/api/v1/products/" + id, HttpMethod.PUT, updateEntity, Map.class);
-
-        assertEquals(HttpStatus.OK, updateResp.getStatusCode());
-        assertEquals("Updated Name", updateResp.getBody().get("name"));
-        assertEquals(15, updateResp.getBody().get("stockQuantity"));
+        mockMvc.perform(put("/api/v1/products/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminToken)
+                .content(objectMapper.writeValueAsString(updateBody)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("Updated Name"))
+            .andExpect(jsonPath("$.stockQuantity").value(15));
     }
 
     @Test
-    void updateProduct_asCustomer_returns403() {
-        var createEntity = new HttpEntity<>(productBody("Product", 10.00, 5), bearerHeaders(adminToken));
-        ResponseEntity<Map> createResp = restTemplate.exchange("/api/v1/products", HttpMethod.POST, createEntity, Map.class);
-        String id = (String) createResp.getBody().get("id");
+    void updateProduct_asCustomer_returns403() throws Exception {
+        var createResp = mockMvc.perform(post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminToken)
+                .content(objectMapper.writeValueAsString(productBody("Product", 10.00, 5))))
+            .andExpect(status().isCreated())
+            .andReturn();
+        String id = objectMapper.readTree(createResp.getResponse().getContentAsString()).get("id").asText();
 
         var updateBody = Map.of("name", "Hacked", "price", 1.00, "stockQuantity", 9999);
-        var updateEntity = new HttpEntity<>(updateBody, bearerHeaders(customerToken));
-        ResponseEntity<Map> updateResp = restTemplate.exchange(
-            "/api/v1/products/" + id, HttpMethod.PUT, updateEntity, Map.class);
-
-        assertEquals(HttpStatus.FORBIDDEN, updateResp.getStatusCode());
+        mockMvc.perform(put("/api/v1/products/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + customerToken)
+                .content(objectMapper.writeValueAsString(updateBody)))
+            .andExpect(status().isForbidden());
     }
 
     @Test
-    void deleteProduct_asAdmin_softDeletesAndReturns204() {
-        var entity = new HttpEntity<>(productBody("To Delete", 9.99, 5), bearerHeaders(adminToken));
-        ResponseEntity<Map> createResp = restTemplate.exchange("/api/v1/products", HttpMethod.POST, entity, Map.class);
-        String id = (String) createResp.getBody().get("id");
+    void deleteProduct_asAdmin_softDeletesAndReturns204() throws Exception {
+        var createResp = mockMvc.perform(post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminToken)
+                .content(objectMapper.writeValueAsString(productBody("To Delete", 9.99, 5))))
+            .andExpect(status().isCreated())
+            .andReturn();
+        String id = objectMapper.readTree(createResp.getResponse().getContentAsString()).get("id").asText();
 
-        var deleteEntity = new HttpEntity<>(bearerHeaders(adminToken));
-        ResponseEntity<Void> deleteResp = restTemplate.exchange(
-            "/api/v1/products/" + id, HttpMethod.DELETE, deleteEntity, Void.class);
+        mockMvc.perform(delete("/api/v1/products/" + id)
+                .header("Authorization", "Bearer " + adminToken))
+            .andExpect(status().isNoContent());
 
-        assertEquals(HttpStatus.NO_CONTENT, deleteResp.getStatusCode());
-        // Soft delete: still in DB but inactive
         var product = productRepository.findById(UUID.fromString(id));
         assertTrue(product.isPresent());
         assertFalse(product.get().isActive());
     }
 
     @Test
-    void deleteProduct_asCustomer_returns403() {
-        var entity = new HttpEntity<>(productBody("Protected", 9.99, 5), bearerHeaders(adminToken));
-        ResponseEntity<Map> createResp = restTemplate.exchange("/api/v1/products", HttpMethod.POST, entity, Map.class);
-        String id = (String) createResp.getBody().get("id");
+    void deleteProduct_asCustomer_returns403() throws Exception {
+        var createResp = mockMvc.perform(post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminToken)
+                .content(objectMapper.writeValueAsString(productBody("Protected", 9.99, 5))))
+            .andExpect(status().isCreated())
+            .andReturn();
+        String id = objectMapper.readTree(createResp.getResponse().getContentAsString()).get("id").asText();
 
-        var deleteEntity = new HttpEntity<>(bearerHeaders(customerToken));
-        ResponseEntity<Void> deleteResp = restTemplate.exchange(
-            "/api/v1/products/" + id, HttpMethod.DELETE, deleteEntity, Void.class);
-
-        assertEquals(HttpStatus.FORBIDDEN, deleteResp.getStatusCode());
+        mockMvc.perform(delete("/api/v1/products/" + id)
+                .header("Authorization", "Bearer " + customerToken))
+            .andExpect(status().isForbidden());
     }
 }
