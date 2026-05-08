@@ -15,11 +15,11 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       user: null,
       login: (token, user) => {
-        import('@/store/cartStore').then(({ useCartStore }) => useCartStore.getState().clear())
+        import('@/store/cartStore').then(({ useCartStore }) => useCartStore.getState().clear()).catch(() => {})
         set({ token, user })
       },
       logout: () => {
-        import('@/store/cartStore').then(({ useCartStore }) => useCartStore.getState().clear())
+        import('@/store/cartStore').then(({ useCartStore }) => useCartStore.getState().clear()).catch(() => {})
         set({ token: null, user: null })
       },
     }),

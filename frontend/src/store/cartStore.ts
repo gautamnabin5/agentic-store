@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { ProductResponse } from '@/api/types'
 
-interface CartItem {
+export interface CartItem {
   product: ProductResponse
   quantity: number
 }

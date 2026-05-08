@@ -6,7 +6,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   const { token, logout } = useAuthStore.getState()
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
     ...(options.headers as Record<string, string> | undefined),
   }
   if (token) {

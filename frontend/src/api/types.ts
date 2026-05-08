@@ -11,7 +11,7 @@ export interface ProductResponse {
 
 export interface ProductRequest {
   name: string
-  description: string
+  description?: string
   price: number
   stockQuantity: number
 }
