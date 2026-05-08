@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ShoppingBag } from 'lucide-react'
 
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -45,6 +46,12 @@ export default function RegisterPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
       <div className="w-full max-w-sm space-y-6">
+        <div className="flex flex-col items-center mb-2">
+          <div className="p-3 rounded-xl bg-primary/10 mb-3">
+            <ShoppingBag className="h-7 w-7 text-primary" />
+          </div>
+          <p className="text-xs font-bold tracking-[0.2em] text-muted-foreground uppercase">Agentic Store</p>
+        </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Create account</h1>
           <p className="text-muted-foreground text-sm mt-1">

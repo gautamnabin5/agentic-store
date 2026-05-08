@@ -5,7 +5,7 @@ import type { ProductResponse } from '@/api/types'
 import { useCartStore } from '@/store/cartStore'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, Minus, Plus } from 'lucide-react'
+import { ChevronLeft, Minus, Plus, Package } from 'lucide-react'
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -24,7 +24,27 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false))
   }, [id])
 
-  if (loading) return <div className="text-muted-foreground">Loading…</div>
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <div className="h-4 w-28 bg-muted rounded animate-pulse mb-6" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="aspect-square bg-muted rounded-xl animate-pulse" />
+          <div className="space-y-4">
+            <div className="h-8 bg-muted rounded animate-pulse" />
+            <div className="h-10 w-24 bg-muted rounded animate-pulse" />
+            <div className="h-6 w-16 bg-muted rounded animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-4 bg-muted rounded animate-pulse" />
+              <div className="h-4 bg-muted rounded animate-pulse" />
+              <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+            </div>
+            <div className="h-11 bg-muted rounded animate-pulse" />
+          </div>
+        </div>
+      </div>
+    )
+  }
   if (error || !product) return <div className="text-destructive">{error ?? 'Product not found'}</div>
 
   const inStock = product.stockQuantity > 0
@@ -44,7 +64,9 @@ export default function ProductDetailPage() {
       </Link>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="aspect-square bg-card rounded-xl border border-border" />
+        <div className="aspect-square bg-accent/50 rounded-xl border border-border flex items-center justify-center">
+          <Package className="h-20 w-20 text-muted-foreground/20" />
+        </div>
 
         <div className="space-y-4">
           <h1 className="text-2xl font-bold">{product.name}</h1>

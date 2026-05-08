@@ -18,7 +18,18 @@ export default function OrderHistoryPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <div className="text-muted-foreground">Loading orders…</div>
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="h-8 w-40 bg-muted rounded animate-pulse" />
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-12 bg-muted/50 rounded animate-pulse" />
+          ))}
+        </div>
+      </div>
+    )
+  }
   if (error) return <div className="text-destructive">Error: {error}</div>
 
   return (

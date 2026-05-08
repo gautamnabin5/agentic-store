@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart } from 'lucide-react'
+import { ShoppingCart, ShoppingBag } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useCartStore } from '@/store/cartStore'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -21,11 +21,14 @@ export default function StorefrontLayout() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border sticky top-0 z-40 bg-background/95 backdrop-blur">
+      <header className="border-b border-primary/15 sticky top-0 z-40 bg-background/90 backdrop-blur">
         <nav className="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between">
           {/* Left */}
-          <Link to="/" className="font-bold text-base tracking-wide text-foreground">
-            STORE
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="p-1.5 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <ShoppingBag className="h-4 w-4 text-primary" />
+            </div>
+            <span className="font-black text-sm tracking-widest">AGENTIC<span className="text-primary">.</span></span>
           </Link>
 
           {/* Centre */}
@@ -89,7 +92,7 @@ export default function StorefrontLayout() {
         </nav>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 py-8" style={{ animation: 'page-in 0.2s ease-out' }}>
         <Outlet />
       </main>
 

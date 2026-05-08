@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Package } from 'lucide-react'
 import { listProducts } from '@/api/products'
 import type { ProductResponse } from '@/api/types'
 import { useCartStore } from '@/store/cartStore'
@@ -17,6 +18,18 @@ import {
 } from '@/components/ui/select'
 
 type SortKey = 'default' | 'price-asc' | 'price-desc' | 'name'
+
+function ProductSkeleton() {
+  return (
+    <div className="bg-card rounded-lg border border-border p-4 flex flex-col gap-3">
+      <div className="aspect-square bg-muted rounded-md animate-pulse" />
+      <div className="h-4 bg-muted rounded animate-pulse" />
+      <div className="h-3 w-16 bg-muted rounded animate-pulse" />
+      <div className="h-5 w-14 bg-muted rounded animate-pulse" />
+      <div className="h-8 bg-muted rounded animate-pulse mt-auto" />
+    </div>
+  )
+}
 
 export default function ProductListPage() {
   const [products, setProducts] = useState<ProductResponse[]>([])
@@ -55,7 +68,21 @@ export default function ProductListPage() {
       })
   }, [products, inStockOnly, priceRange, sortBy])
 
-  if (loading) return <div className="text-muted-foreground">Loading products…</div>
+  if (loading) {
+    return (
+      <div className="flex gap-6">
+        <aside className="w-56 flex-shrink-0 space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-10 bg-muted rounded-md animate-pulse" />
+          ))}
+        </aside>
+        <div className="flex-1 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => <ProductSkeleton key={i} />)}
+        </div>
+      </div>
+    )
+  }
+
   if (error) return <div className="text-destructive">Error: {error}</div>
 
   return (
@@ -101,7 +128,11 @@ export default function ProductListPage() {
       {/* Product grid */}
       <div className="flex-1">
         {filtered.length === 0 ? (
-          <p className="text-muted-foreground">No products match your filters.</p>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <Package className="h-12 w-12 text-muted-foreground/25 mb-4" />
+            <p className="text-muted-foreground font-medium">No products match your filters</p>
+            <p className="text-muted-foreground/60 text-sm mt-1">Try adjusting the price range or filters</p>
+          </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {filtered.map((product) => {
@@ -109,10 +140,14 @@ export default function ProductListPage() {
               return (
                 <div
                   key={product.id}
-                  className="bg-card rounded-lg border border-border p-4 flex flex-col gap-2"
+                  className="bg-card rounded-lg border border-border p-4 flex flex-col gap-2
+                             hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5
+                             transition-all duration-200"
                 >
                   <Link to={`/products/${product.id}`}>
-                    <div className="aspect-square bg-accent rounded-md mb-1" />
+                    <div className="aspect-square bg-accent/60 rounded-md mb-1 flex items-center justify-center">
+                      <Package className="h-10 w-10 text-muted-foreground/20" />
+                    </div>
                   </Link>
                   <Link
                     to={`/products/${product.id}`}

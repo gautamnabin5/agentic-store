@@ -22,7 +22,22 @@ export default function OrderDetailPage() {
       .finally(() => setLoading(false))
   }, [id])
 
-  if (loading) return <div className="text-muted-foreground">Loading order…</div>
+  if (loading) {
+    return (
+      <div className="max-w-2xl space-y-6">
+        <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+        <div className="space-y-2">
+          <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-64 bg-muted rounded animate-pulse" />
+        </div>
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-12 bg-muted/50 rounded animate-pulse" />
+          ))}
+        </div>
+      </div>
+    )
+  }
   if (error || !order) return <div className="text-destructive">{error ?? 'Order not found'}</div>
 
   return (

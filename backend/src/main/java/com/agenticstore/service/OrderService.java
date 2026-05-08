@@ -84,11 +84,13 @@ public class OrderService {
         return Result.created(OrderResponse.from(orderRepository.save(order)));
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponse> listForUser(UUID userId) {
         return orderRepository.findAllByUserId(userId).stream()
                 .map(OrderResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public Result<OrderResponse> getForUser(UUID orderId, UUID userId) {
         return orderRepository.findById(orderId)
                 .map(order -> {
@@ -100,11 +102,13 @@ public class OrderService {
                 .orElseGet(() -> Result.failure("Order not found", 404));
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponse> listAll() {
         return orderRepository.findAll().stream()
                 .map(OrderResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public Result<OrderResponse> getAny(UUID orderId) {
         return orderRepository.findById(orderId)
                 .map(o -> Result.<OrderResponse>ok(OrderResponse.from(o)))
