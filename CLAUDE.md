@@ -26,11 +26,12 @@ agentic-store/
 ## Tech Stack
 
 ### Frontend (`frontend/`)
-- React 18+, TypeScript
+- React 19+, TypeScript
 - Vite as build tool
-- shadcn/ui for component library (Tailwind CSS under the hood)
-- React Router for navigation
-- Fetch or Axios for API calls
+- shadcn/ui for component library (Tailwind CSS v4 under the hood)
+- React Router v7 for navigation
+- Fetch for API calls
+- pnpm as package manager
 - Production: Nginx serving the static build
 
 ### Backend (`backend/`)
@@ -50,8 +51,8 @@ agentic-store/
 
 ### Prerequisites
 - Docker + Docker Compose
-- Node.js 20+ / npm
-- Java 21+ / Maven
+- Bun + pnpm (frontend)
+- Java 21 + Maven (installed system-wide)
 
 ### Running Locally
 
@@ -65,11 +66,11 @@ docker compose up --build
 docker compose up db
 
 # Backend (from backend/)
-./mvnw spring-boot:run
+mvn spring-boot:run
 
 # Frontend (from frontend/)
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Service ports (default):
@@ -120,8 +121,8 @@ VITE_API_BASE_URL=http://localhost:8080
 - Standard Spring layering: `controller` → `service` → `repository`
 - DTOs in `dto/`, entities in `model/` or `entity/`
 - REST endpoints under `/api/v1/`
-- Return `ResponseEntity<T>` from controllers
-- All service methods return `Result<T>` (a sealed type wrapping success/failure) — never throw checked exceptions across layer boundaries; let the controller unwrap and map to HTTP status
+- Controllers return `Result<T>` directly — `ResultResponseBodyAdvice` maps them to HTTP responses automatically
+- All service methods return `Result<T>` (a sealed type wrapping success/failure) — never throw checked exceptions across layer boundaries
 - Use `@Transactional` at the service layer, not controller
 
 ### Database
@@ -133,12 +134,12 @@ VITE_API_BASE_URL=http://localhost:8080
 
 ### Frontend
 ```bash
-cd frontend && npm test
+cd frontend && pnpm test
 ```
 
 ### Backend
 ```bash
-cd backend && ./mvnw test
+cd backend && mvn test
 ```
 
 - Spring Boot: use `@SpringBootTest` for integration tests, `@WebMvcTest` for controller unit tests
