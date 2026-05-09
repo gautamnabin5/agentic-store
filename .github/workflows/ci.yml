@@ -77,18 +77,13 @@ jobs:
 
   deploy:
     name: Deploy to Docker server
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [backend-unit-tests, backend-integration-tests, frontend-tests]
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
 
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            cd ~/agentic-store
-            git pull origin master
-            docker compose up -d --build
+      - name: Pull and redeploy
+        run: |
+          cd ~/agentic-store
+          git pull origin master
+          docker compose up -d --build
