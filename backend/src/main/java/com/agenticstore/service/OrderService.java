@@ -9,6 +9,8 @@ import com.agenticstore.entity.Product;
 import com.agenticstore.repository.OrderRepository;
 import com.agenticstore.repository.ProductRepository;
 import com.agenticstore.repository.UserRepository;
+import org.springaicommunity.mcp.annotation.McpTool;
+import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,8 +34,16 @@ public class OrderService {
         this.userRepository = userRepository;
     }
 
+    @McpTool(
+        name = "place_order",
+        title = "Place Order",
+        description = "Place a new order for a user with a list of products and quantities",
+        annotations = @McpTool.McpAnnotations(destructiveHint = false, openWorldHint = false)
+    )
     @Transactional
-    public Result<OrderResponse> placeOrder(UUID userId, PlaceOrderRequest request) {
+    public Result<OrderResponse> placeOrder(
+            @McpToolParam(description = "UUID of the user placing the order") UUID userId,
+            @McpToolParam(description = "Order details containing a list of product IDs and quantities") PlaceOrderRequest request) {
         var user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return Result.failure("User not found", 404);
@@ -84,14 +94,29 @@ public class OrderService {
         return Result.created(OrderResponse.from(orderRepository.save(order)));
     }
 
+    @McpTool(
+        name = "list_user_orders",
+        title = "List User Orders",
+        description = "List all orders placed by a specific user",
+        annotations = @McpTool.McpAnnotations(readOnlyHint = true, openWorldHint = false)
+    )
     @Transactional(readOnly = true)
-    public List<OrderResponse> listForUser(UUID userId) {
+    public List<OrderResponse> listForUser(
+            @McpToolParam(description = "UUID of the user whose orders to retrieve") UUID userId) {
         return orderRepository.findAllByUserId(userId).stream()
                 .map(OrderResponse::from).toList();
     }
 
+    @McpTool(
+        name = "get_user_order",
+        title = "Get User Order",
+        description = "Get a specific order by ID, scoped to the requesting user",
+        annotations = @McpTool.McpAnnotations(readOnlyHint = true, idempotentHint = true, openWorldHint = false)
+    )
     @Transactional(readOnly = true)
-    public Result<OrderResponse> getForUser(UUID orderId, UUID userId) {
+    public Result<OrderResponse> getForUser(
+            @McpToolParam(description = "UUID of the order to retrieve") UUID orderId,
+            @McpToolParam(description = "UUID of the user who must own the order") UUID userId) {
         return orderRepository.findById(orderId)
                 .map(order -> {
                     if (!order.getUser().getId().equals(userId)) {
@@ -102,14 +127,27 @@ public class OrderService {
                 .orElseGet(() -> Result.failure("Order not found", 404));
     }
 
+    @McpTool(
+        name = "list_all_orders",
+        title = "List All Orders",
+        description = "List all orders across all users (admin use)",
+        annotations = @McpTool.McpAnnotations(readOnlyHint = true, openWorldHint = false)
+    )
     @Transactional(readOnly = true)
     public List<OrderResponse> listAll() {
         return orderRepository.findAll().stream()
                 .map(OrderResponse::from).toList();
     }
 
+    @McpTool(
+        name = "get_order",
+        title = "Get Order",
+        description = "Get any order by ID regardless of which user placed it (admin use)",
+        annotations = @McpTool.McpAnnotations(readOnlyHint = true, idempotentHint = true, openWorldHint = false)
+    )
     @Transactional(readOnly = true)
-    public Result<OrderResponse> getAny(UUID orderId) {
+    public Result<OrderResponse> getAny(
+            @McpToolParam(description = "UUID of the order to retrieve") UUID orderId) {
         return orderRepository.findById(orderId)
                 .map(o -> Result.<OrderResponse>ok(OrderResponse.from(o)))
                 .orElseGet(() -> Result.failure("Order not found", 404));
