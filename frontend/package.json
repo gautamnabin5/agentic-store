@@ -27,6 +27,9 @@
     "zod": "^4.4.3",
     "zustand": "^5.0.13"
   },
+  "pnpm": {
+    "ignoredBuiltDependencies": ["msw"]
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.2.4",
