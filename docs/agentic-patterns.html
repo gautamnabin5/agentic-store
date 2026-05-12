@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic Architecture Patterns</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 32px 24px; }
+  h1 { font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 32px; }
+
+  .section-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #64748b; margin-bottom: 14px; margin-top: 32px; padding-bottom: 6px; border-bottom: 1px solid #1e293b; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: #475569; }
+  .card.highlight { border-color: #6366f1; background: #1e1b4b22; }
+  .card.you-are-here { border-color: #22c55e; background: #14532d18; }
+
+  .badge {
+    display: inline-block; font-size: 0.65rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px; margin-bottom: 10px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .badge.green { background: #14532d; color: #86efac; }
+  .badge.purple { background: #3b0764; color: #c4b5fd; }
+  .badge.blue { background: #172554; color: #93c5fd; }
+  .badge.amber { background: #451a03; color: #fcd34d; }
+  .badge.slate { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+
+  .card h3 { font-size: 1rem; font-weight: 600; color: #f1f5f9; margin-bottom: 6px; }
+  .card p { font-size: 0.82rem; color: #94a3b8; line-height: 1.6; margin-bottom: 12px; }
+
+  .diagram {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.72rem;
+    background: #0f1117;
+    border-radius: 8px;
+    padding: 12px;
+    line-height: 1.9;
+    color: #64748b;
+    margin-bottom: 12px;
+  }
+  .d-user { color: #6366f1; }
+  .d-agent { color: #f59e0b; }
+  .d-llm { color: #0ea5e9; }
+  .d-tools { color: #22c55e; }
+  .d-mem { color: #a855f7; }
+  .d-orch { color: #ec4899; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .tag { font-size: 0.68rem; background: #0f1117; border: 1px solid #334155; border-radius: 4px; padding: 2px 7px; color: #64748b; }
+
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 24px; }
+  .compare-table th { background: #1e293b; color: #94a3b8; font-weight: 600; text-align: left; padding: 10px 14px; border-bottom: 1px solid #334155; }
+  .compare-table td { padding: 10px 14px; border-bottom: 1px solid #1e293b; color: #cbd5e1; vertical-align: top; }
+  .compare-table tr:hover td { background: #1e293b44; }
+  .yes { color: #22c55e; }
+  .no { color: #ef4444; }
+  .partial { color: #f59e0b; }
+
+  .native-box {
+    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+    border: 1px solid #6366f1;
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 32px;
+  }
+  .native-box h3 { font-size: 1.1rem; font-weight: 700; color: #a5b4fc; margin-bottom: 10px; }
+  .native-box p { font-size: 0.83rem; color: #94a3b8; line-height: 1.7; }
+  .native-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 16px; }
+  .native-col h4 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #6366f1; margin-bottom: 8px; }
+  .native-col ul { padding-left: 16px; }
+  .native-col li { font-size: 0.81rem; color: #94a3b8; line-height: 1.8; }
+</style>
+</head>
+<body>
+<h1>Agentic Architecture Patterns</h1>
+<p class="subtitle">The landscape of agentic systems — retrofitted and native</p>
+
+<div class="section-label">Retrofitting Patterns (existing stack → add agent)</div>
+
+<div class="grid">
+
+  <div class="card you-are-here">
+    <div class="badge green">You are here</div>
+    <h3>Single Agent + MCP Tools</h3>
+    <p>One agent, one LLM, a set of tools exposed via MCP. The agent decides which tools to call in a ReAct loop (Reason → Act → Observe → repeat) until it has an answer.</p>
+    <div class="diagram">
+      <span class="d-user">User</span> → <span class="d-agent">Agent</span> → <span class="d-llm">LLM</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓ tool calls<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="d-tools">[ listProducts | placeOrder | getOrder ]</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spring Boot MCP Server
+    </div>
+    <div class="tags"><span class="tag">ReAct loop</span><span class="tag">MCP</span><span class="tag">Google ADK</span><span class="tag">LiteLLM</span></div>
+  </div>
+
+  <div class="card">
+    <div class="badge purple">Orchestrator-Worker</div>
+    <h3>Multi-Agent (ADK Sub-agents)</h3>
+    <p>An orchestrator agent routes requests to specialized sub-agents. Each sub-agent has its own tools and persona. Good when tasks are truly distinct domains. ADK has first-class support for this pattern.</p>
+    <div class="diagram">
+      <span class="d-user">User</span> → <span class="d-orch">Orchestrator Agent</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+      <span class="d-agent">CatalogAgent</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="d-agent">OrderAgent</span><br>
+      &nbsp;&nbsp;↓ tools&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓ tools<br>
+      <span class="d-tools">listProducts</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="d-tools">placeOrder</span><br>
+      <span class="d-tools">searchProduct</span>&nbsp;&nbsp;&nbsp;<span class="d-tools">getOrder</span>
+    </div>
+    <div class="tags"><span class="tag">ADK sub-agents</span><span class="tag">domain routing</span><span class="tag">parallel execution</span></div>
+  </div>
+
+  <div class="card">
+    <div class="badge blue">Pipeline</div>
+    <h3>Sequential / Pipeline Agents</h3>
+    <p>Agents chained in a fixed pipeline. Each step transforms the output of the previous. Good for structured workflows: classify intent → validate input → execute → format response. Deterministic, easy to debug.</p>
+    <div class="diagram">
+      <span class="d-user">User message</span><br>
+      &nbsp;&nbsp;↓<br>
+      <span class="d-agent">IntentClassifier</span> → "place_order"<br>
+      &nbsp;&nbsp;↓<br>
+      <span class="d-agent">InputValidator</span> → {productId, qty}<br>
+      &nbsp;&nbsp;↓<br>
+      <span class="d-agent">OrderExecutor</span> → calls placeOrder tool<br>
+      &nbsp;&nbsp;↓<br>
+      <span class="d-agent">ResponseFormatter</span>
+    </div>
+    <div class="tags"><span class="tag">deterministic</span><span class="tag">debuggable</span><span class="tag">LangGraph</span></div>
+  </div>
+
+  <div class="card">
+    <div class="badge amber">Async / Event-driven</div>
+    <h3>Background / Long-running Agents</h3>
+    <p>Agent is triggered by events (webhook, queue, schedule) rather than chat messages. User fires a task and gets notified when done. Good for: "watch my order", "restock alert", "nightly report".</p>
+    <div class="diagram">
+      <span class="d-user">User</span>: "notify me when order ships"<br>
+      &nbsp;&nbsp;↓ enqueued job<br>
+      <span class="d-agent">WatcherAgent</span> (runs async)<br>
+      &nbsp;&nbsp;↓ polls getOrder tool every N min<br>
+      <span class="d-tools">status changed → SHIPPED</span><br>
+      &nbsp;&nbsp;↓<br>
+      <span class="d-user">Push notification / email to user</span>
+    </div>
+    <div class="tags"><span class="tag">Celery/ARQ</span><span class="tag">webhooks</span><span class="tag">notifications</span></div>
+  </div>
+
+  <div class="card">
+    <div class="badge purple">Memory-augmented</div>
+    <h3>Agent with Persistent Memory</h3>
+    <p>Agent stores user preferences, past interactions, and learned facts across sessions. Next time: "I usually order the same thing" or "remember my address". Short-term = conversation window. Long-term = vector DB or KV store.</p>
+    <div class="diagram">
+      <span class="d-user">User</span>: "order my usual"<br>
+      &nbsp;&nbsp;↓<br>
+      <span class="d-agent">Agent</span> → reads <span class="d-mem">UserMemory</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← {lastOrder: [productX qty:2]}<br>
+      &nbsp;&nbsp;↓<br>
+      <span class="d-tools">placeOrder(productX, 2)</span><br>
+      &nbsp;&nbsp;↓ writes back<br>
+      <span class="d-mem">UserMemory</span>: "prefers productX"
+    </div>
+    <div class="tags"><span class="tag">Mem0</span><span class="tag">Redis</span><span class="tag">pgvector</span><span class="tag">personalization</span></div>
+  </div>
+
+  <div class="card">
+    <div class="badge blue">RAG hybrid</div>
+    <h3>Agent + Retrieval (RAG)</h3>
+    <p>Agent can search a knowledge base before answering — product docs, FAQs, policies. Retrieval tool returns relevant chunks; LLM synthesizes. Eliminates hallucinated product details or policy answers.</p>
+    <div class="diagram">
+      <span class="d-user">User</span>: "does ProductX work with Mac?"<br>
+      &nbsp;&nbsp;↓<br>
+      <span class="d-agent">Agent</span> calls <span class="d-tools">searchKnowledgeBase</span><br>
+      &nbsp;&nbsp;← "Compatible with macOS 12+"<br>
+      &nbsp;&nbsp;↓<br>
+      <span class="d-llm">LLM</span> synthesizes answer with citation
+    </div>
+    <div class="tags"><span class="tag">pgvector</span><span class="tag">embeddings</span><span class="tag">semantic search</span></div>
+  </div>
+
+</div>
+
+<div class="section-label">Agentic-Native Patterns (built AI-first from day one)</div>
+
+<div class="native-box">
+  <h3>What "agentic-native" means</h3>
+  <p>Instead of adding an agent on top of a REST API, you design the system <em>around</em> the agent from the start. The LLM + tools layer IS the primary interface — not an afterthought layered over a human-facing API. Think Cursor, Claude Code, Linear's AI intake.</p>
+  <div class="native-cols">
+    <div class="native-col">
+      <h4>Retrofitting (what you're doing)</h4>
+      <ul>
+        <li>REST API built for humans first</li>
+        <li>Agent wraps it after the fact</li>
+        <li>Tools mirror existing endpoints</li>
+        <li>Auth designed for browser sessions</li>
+        <li>State lives in DB, agent is stateless</li>
+        <li>Hard to change DB schema for agent needs</li>
+      </ul>
+    </div>
+    <div class="native-col">
+      <h4>Agentic-native</h4>
+      <ul>
+        <li>Tools are the primary API contract</li>
+        <li>Schema designed for agent context (fewer joins, denormalized reads)</li>
+        <li>Auth designed for agent sessions (e.g. short-lived tool tokens)</li>
+        <li>State can live in the agent context window</li>
+        <li>Streaming is a first-class requirement</li>
+        <li>No UI required — agent IS the UX</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="grid" style="margin-top:16px">
+
+  <div class="card highlight">
+    <div class="badge purple">Native Pattern</div>
+    <h3>Tool-First Design</h3>
+    <p>You design your system's capabilities as tools before building any UI. The tool schema IS the API contract. Vercel AI SDK, LlamaIndex, and Anthropic's tool use all push this model.</p>
+    <div class="diagram">
+      No REST layer. Tools ARE the API:<br><br>
+      <span class="d-tools">createOrder(items[])</span><br>
+      <span class="d-tools">searchProducts(query, filters)</span><br>
+      <span class="d-tools">getUserHistory(limit)</span><br>
+      <span class="d-tools">trackShipment(orderId)</span><br><br>
+      UI components call the same tools<br>
+      the agent does — via a shared SDK.
+    </div>
+    <div class="tags"><span class="tag">Vercel AI SDK</span><span class="tag">tool-first API</span></div>
+  </div>
+
+  <div class="card highlight">
+    <div class="badge purple">Native Pattern</div>
+    <h3>Agent-as-Backend</h3>
+    <p>The LLM agent IS the backend. No traditional REST layer — the frontend sends messages, the agent decides what to do and calls internal functions. State is managed in conversation history + a lightweight store. Used by startups going fast.</p>
+    <div class="diagram">
+      <span class="d-user">React frontend</span><br>
+      &nbsp;&nbsp;↓ messages[]<br>
+      <span class="d-agent">Agent (LLM + tools)</span><br>
+      &nbsp;&nbsp;↓ function calls<br>
+      <span class="d-tools">DB / services / external APIs</span><br><br>
+      No controller layer.<br>
+      No service layer.<br>
+      LLM IS the business logic.
+    </div>
+    <div class="tags"><span class="tag">extreme</span><span class="tag">fast iteration</span><span class="tag">high LLM cost</span></div>
+  </div>
+
+  <div class="card highlight">
+    <div class="badge purple">Native Pattern</div>
+    <h3>Structured Output / Form-free UX</h3>
+    <p>Instead of forms, the user describes what they want in natural language. The agent uses structured output (JSON mode) to extract typed data, then presents it back for confirmation before acting. The "form" emerges from the conversation.</p>
+    <div class="diagram">
+      <span class="d-user">User</span>: "2 of the blue widget and 1 red one"<br>
+      &nbsp;&nbsp;↓ LLM extracts<br>
+      <span class="d-llm">{items: [{id:"blue-widget",qty:2},<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{id:"red-widget",qty:1}]}</span><br>
+      &nbsp;&nbsp;↓ agent confirms<br>
+      "Place this order? Total: $47.00"<br>
+      &nbsp;&nbsp;↓ user: "yes"<br>
+      <span class="d-tools">placeOrder(items)</span>
+    </div>
+    <div class="tags"><span class="tag">structured output</span><span class="tag">confirmation pattern</span><span class="tag">form-free</span></div>
+  </div>
+
+  <div class="card highlight">
+    <div class="badge purple">Native Pattern</div>
+    <h3>Human-in-the-Loop (HITL)</h3>
+    <p>Agent pauses before irreversible actions and asks for explicit human approval. Not just "are you sure?" — the agent presents a structured summary of what it's about to do. Critical for destructive or financial actions like placing orders.</p>
+    <div class="diagram">
+      Agent plans: placeOrder([...])<br>
+      &nbsp;&nbsp;↓ PAUSE — irreversible<br>
+      <span class="d-agent">Agent</span>: "About to place:<br>
+      &nbsp;• Blue Widget x2 — $18.00<br>
+      &nbsp;• Red Widget x1 — $29.00<br>
+      &nbsp;Total: $47.00. Confirm?"<br>
+      &nbsp;&nbsp;↓ user: "yes"<br>
+      <span class="d-tools">placeOrder(items)</span> ← executes
+    </div>
+    <div class="tags"><span class="tag">safety</span><span class="tag">confirmation</span><span class="tag">irreversible actions</span></div>
+  </div>
+
+</div>
+
+<div class="section-label">Comparison: Which pattern fits which goal</div>
+
+<table class="compare-table">
+  <tr>
+    <th>Pattern</th>
+    <th>Best for</th>
+    <th>Streaming needed</th>
+    <th>State complexity</th>
+    <th>LLM cost</th>
+  </tr>
+  <tr>
+    <td><strong>Single Agent + MCP</strong> <span style="color:#22c55e">← you</span></td>
+    <td>Focused task domain, reuses existing tools</td>
+    <td class="yes">Yes</td>
+    <td>Low (per-request)</td>
+    <td class="partial">Medium</td>
+  </tr>
+  <tr>
+    <td><strong>Multi-Agent Orchestrator</strong></td>
+    <td>Multiple distinct domains, parallel tasks</td>
+    <td class="yes">Yes</td>
+    <td>Medium (routing)</td>
+    <td class="no">High</td>
+  </tr>
+  <tr>
+    <td><strong>Sequential Pipeline</strong></td>
+    <td>Structured workflows, determinism matters</td>
+    <td class="partial">Optional</td>
+    <td>Low (linear)</td>
+    <td class="yes">Low</td>
+  </tr>
+  <tr>
+    <td><strong>Async / Event-driven</strong></td>
+    <td>Long-running tasks, notifications</td>
+    <td class="no">No</td>
+    <td>Medium (job state)</td>
+    <td class="yes">Low</td>
+  </tr>
+  <tr>
+    <td><strong>Memory-augmented</strong></td>
+    <td>Personalization, returning users</td>
+    <td class="yes">Yes</td>
+    <td>High (memory store)</td>
+    <td class="partial">Medium</td>
+  </tr>
+  <tr>
+    <td><strong>RAG hybrid</strong></td>
+    <td>Knowledge-heavy Q&amp;A, product docs</td>
+    <td class="yes">Yes</td>
+    <td>Medium (vector store)</td>
+    <td class="partial">Medium</td>
+  </tr>
+  <tr>
+    <td><strong>Agent-as-Backend</strong></td>
+    <td>Greenfield, extreme speed, demos</td>
+    <td class="yes">Yes</td>
+    <td>Low (LLM context)</td>
+    <td class="no">Very high</td>
+  </tr>
+  <tr>
+    <td><strong>Tool-first Design</strong></td>
+    <td>Native apps, shared tool contract</td>
+    <td class="partial">Optional</td>
+    <td>Low</td>
+    <td class="partial">Medium</td>
+  </tr>
+</table>
+
+</body>
+</html>
