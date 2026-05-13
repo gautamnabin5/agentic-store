@@ -34,4 +34,11 @@ class OrderServiceSecurityTest {
         assertThrows(AccessDeniedException.class,
             () -> orderService.getAny(java.util.UUID.randomUUID()));
     }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void getAny_asAdmin_doesNotThrow() {
+        // Security passes; order may not exist which is fine
+        orderService.getAny(java.util.UUID.randomUUID());
+    }
 }
