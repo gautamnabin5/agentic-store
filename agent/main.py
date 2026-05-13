@@ -58,6 +58,7 @@ async def stream_response(request: ChatRequest, jwt: str):
             adk_session.state["confirmed"] = True
             user_message = "Yes, confirmed. Please place the order."
         else:
+            adk_session.state["confirmed"] = False
             user_message = "Cancel the order."
     else:
         user_message = request.message or ""
