@@ -24,7 +24,7 @@ agent service          (new — Python, FastAPI, port 8000)
   │  MCP/SSE + Bearer JWT (per-session)
   ├──────────────────────────────────────────────────────▶  backend (Spring Boot, :8080)
   │                                                              │
-  │  LLM calls (OpenAI-compatible)                              ▼
+  │  LLM calls (OpenAI-compatible)                               ▼
   └──────────────────────────────────────────────────────▶  PostgreSQL (:5432)
        LiteLLM proxy (10.0.0.32) — model alias "smart"
 ```
@@ -238,9 +238,33 @@ Port 8000 must be externally accessible on the Docker server for the browser to 
 
 ---
 
+## Known Limitations
+
+### Frontend → Agent SSE
+Each chat message is a **separate HTTP request**, not a persistent connection. The agent streams the response as SSE and closes the stream on `{"type":"done"}`. FastAPI/uvicorn handles this asynchronously (no thread-per-connection). Not a scalability concern.
+
+### Agent → Spring Boot MCP SSE (per-session persistent connections)
+Each session creates one persistent SSE socket to `backend:8080/mcp/sse` via `MCPToolset`. These connections are never explicitly closed in Phase 1 — the toolset lives in `session.state` with no TTL. Under sustained traffic, open sockets accumulate until the agent container restarts.
+
+Spring MVC NIO (Tomcat) handles persistent SSE connections without blocking threads (async dispatch releases threads after the initial connection is accepted). The socket ceiling is ~10K (NIO connector default). So this is a **resource leak** (sockets/memory per idle session), not a throughput bottleneck, at demo scale.
+
+Mitigation path: implement a session TTL (e.g. 30 minutes of inactivity) that explicitly closes the `MCPToolset` and removes the session. Not built in Phase 1.
+
+### Tool call throughput (Spring Boot)
+Each `POST /mcp/messages` (one per tool call) is a synchronous blocking request consuming a Tomcat thread for the duration of the service method. Default thread pool: 200. For CRUD methods that complete in milliseconds this is not a bottleneck at demo scale. At high concurrent tool call volume, the fix is Spring WebFlux (`spring-ai-starter-mcp-server-webflux`) — a drop-in replacement that serves thousands of concurrent SSE connections and tool call requests reactively.
+
+### Agent horizontal scaling
+The in-memory `InMemorySessionService` is single-process. Multiple agent replicas cannot share session state. Horizontal scaling requires replacing it with a Redis-backed session service. Not built in Phase 1.
+
+### LiteLLM proxy
+The shared LiteLLM proxy at `10.0.0.32` is the inference throughput ceiling. Under sustained load, queuing at the proxy — not the SSE connections — is the first bottleneck to hit.
+
+---
+
 ## Out of Scope
 
 - Cross-session memory ("order my usual") — deferred to Phase 2 with Redis-backed session service.
+- Session TTL and MCPToolset cleanup on expiry.
 - Multi-agent orchestration (CatalogAgent + OrderAgent).
 - Async/background agents (order watch, restock alerts).
 - RAG over product catalog.
@@ -248,3 +272,4 @@ Port 8000 must be externally accessible on the Docker server for the browser to 
 - Per-role MCP tool list filtering at the Spring AI/server level.
 - WebSocket transport (SSE is sufficient for one-way streaming).
 - Agent-side retry / exponential backoff on MCP failures.
+- Spring WebFlux migration for high-concurrency MCP.
