@@ -1,4 +1,4 @@
-import { KeyboardEvent, useRef } from 'react'
+import { type KeyboardEvent, useRef } from 'react'
 import { SendHorizonal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
