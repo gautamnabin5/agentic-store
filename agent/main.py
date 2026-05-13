@@ -23,8 +23,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
     allow_credentials=True,
-    allow_methods=["POST", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 session_service = InMemorySessionService()
@@ -38,9 +38,7 @@ class ChatRequest(BaseModel):
 
 
 def sse(data: dict) -> str:
-    return f"data: {json.dumps(data)}
-
-"
+    return "data: " + json.dumps(data) + chr(10) + chr(10)
 
 
 async def stream_response(request: ChatRequest, jwt: str):
@@ -56,11 +54,7 @@ async def stream_response(request: ChatRequest, jwt: str):
         try:
             cached = await bootstrap_session(request.session_id, jwt, session_service)
         except Exception as e:
-            log.error(
-                "bootstrap_session failed session_id=%s",
-                request.session_id,
-                exc_info=True,
-            )
+            log.error("bootstrap_session failed session_id=%s", request.session_id, exc_info=True)
             yield sse({"type": "error", "message": f"Session error: {str(e)}"})
             yield sse({"type": "done"})
             return
@@ -88,9 +82,7 @@ async def stream_response(request: ChatRequest, jwt: str):
     try:
         log.info(
             "runner.run_async start user_id=%s session_id=%s msg=%r",
-            user_id,
-            request.session_id,
-            user_message[:80],
+            user_id, request.session_id, user_message[:80],
         )
         async for event in runner.run_async(
             user_id=user_id,
@@ -99,13 +91,12 @@ async def stream_response(request: ChatRequest, jwt: str):
         ):
             log.debug(
                 "ADK event author=%s has_content=%s",
-                getattr(event, "author", "?"),
-                bool(event.content),
+                getattr(event, "author", "?"), bool(event.content),
             )
             if event.content and event.content.parts:
                 for part in event.content.parts:
                     if part.text:
-                        log.info("yielding text chunk len=%d", len(part.text))
+                        log.info("yielding text len=%d", len(part.text))
                         yield sse({"type": "text", "content": part.text})
 
             for func_resp in event.get_function_responses():
