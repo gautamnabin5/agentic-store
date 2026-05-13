@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import CartDrawer from '@/components/cart/CartDrawer'
+import ChatBubble from '@/components/chat/ChatBubble'
 
 export default function StorefrontLayout() {
   const { token, user, logout } = useAuthStore()
@@ -97,6 +98,7 @@ export default function StorefrontLayout() {
       </main>
 
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      <ChatBubble />
     </div>
   )
 }
