@@ -63,3 +63,4 @@ __pycache__/
 
 # ---- Docs / Plans ----
 docs/plans/
+agent/__pycache__/
