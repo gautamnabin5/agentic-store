@@ -53,5 +53,13 @@ docker/postgres-data/
 *.log
 logs/
 
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.python-version
+
 # ---- Docs / Plans ----
 docs/plans/

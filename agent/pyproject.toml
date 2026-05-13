@@ -1,0 +1,31 @@
+[project]
+name = "agentic-store-agent"
+version = "0.1.0"
+description = "AI agent for agentic-store"
+authors = [
+    {name = "Nabin Gautam",email = "gautamnabin5@gmail.com"}
+]
+requires-python = "^3.11"
+dependencies = [
+    "fastapi==0.115.0",
+    "uvicorn[standard]==0.30.6",
+    "google-adk==1.2.1",
+    "pydantic-settings==2.3.4",
+    "PyJWT==2.9.0",
+    "httpx==0.27.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.2",
+    "pytest-asyncio==0.23.8",
+    "pytest-mock==3.14.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
