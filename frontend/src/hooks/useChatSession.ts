@@ -100,7 +100,11 @@ export function useChatSession() {
                 args: (chunk.args as ToolCallMessage['args']) ?? {},
               },
             ])
-          } else if (chunk.type === 'done' || chunk.type === 'error') {
+          } else if (chunk.type === 'error') {
+            const errId = crypto.randomUUID()
+            setMessages((prev) => [...prev, { id: errId, role: 'assistant', content: 'Error: ' + (chunk as any).message }])
+            break
+          } else if (chunk.type === 'done') {
             break
           }
         }

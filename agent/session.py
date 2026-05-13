@@ -35,7 +35,7 @@ def store_session(session_id: str, data: dict) -> None:
 async def bootstrap_session(session_id: str, jwt: str, session_service: Any) -> dict:
     """Bootstrap a new session: decode JWT, connect MCP, filter tools, build runner. Raises jwt.InvalidTokenError on bad token."""
     from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
-    from mcp import SseServerParams
+    from google.adk.tools.mcp_tool.mcp_session_manager import SseServerParams
     from agent import build_agent
     from google.adk.runners import Runner
 
