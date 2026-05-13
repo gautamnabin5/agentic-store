@@ -42,11 +42,11 @@ export function useChatSession() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${AGENT_BASE_URL}/chat`, {
+      const response = await fetch(AGENT_BASE_URL + '/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: 'Bearer ' + token,
         },
         body: JSON.stringify(body),
         signal: ctrl.signal,
@@ -65,11 +65,10 @@ export function useChatSession() {
         if (done) break
         buffer += decoder.decode(value, { stream: true })
 
-        const lines = buffer.split('
-')
-        buffer = lines.pop() ?? ''
+        const chunks = buffer.split('\n')
+        buffer = chunks.pop() ?? ''
 
-        for (const line of lines) {
+        for (const line of chunks) {
           if (!line.startsWith('data: ')) continue
           const json = line.slice(6).trim()
           if (!json) continue
@@ -82,7 +81,8 @@ export function useChatSession() {
               assistantId = crypto.randomUUID()
               assistantContent = chunk.content
               const newId = assistantId
-              setMessages((prev) => [...prev, { id: newId, role: 'assistant', content: assistantContent }])
+              const initContent = assistantContent
+              setMessages((prev) => [...prev, { id: newId, role: 'assistant', content: initContent }])
             } else {
               assistantContent += chunk.content
               const curId = assistantId
