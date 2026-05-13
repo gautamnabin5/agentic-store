@@ -17,6 +17,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.75.0(react@19.2.6))
+      '@tanstack/ai-react':
+        specifier: ^0.8.2
+        version: 0.8.2(@tanstack/ai@0.16.0)(@types/react@19.2.14)(react@19.2.6)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -110,6 +113,9 @@ packages:
 
   '@adobe/css-tools@4.4.4':
     resolution: {integrity: sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==}
+
+  '@ag-ui/core@0.0.49':
+    resolution: {integrity: sha512-9ywypwjUGtIvTxJ2eKQjhPZgLnSFAfNK7vZUcT7Bz4ur4yAIB+lAFtzvu7VDYe6jsUx/6N/71Dh4R0zX5woNVw==}
 
   '@asamuzakjp/css-color@5.1.11':
     resolution: {integrity: sha512-KVw6qIiCTUQhByfTd78h2yD1/00waTmm9uy/R7Ck/ctUyAPj+AEDLkQIdJW0T8+qGgj3j5bpNKK7Q3G+LedJWg==}
@@ -749,6 +755,35 @@ packages:
     resolution: {integrity: sha512-pCvohwOCspk3ZFn6eJzrrX3g4n2JY73H6MmYC87XfGPyTty4YsCjYTMArRZm/zOI8dIt3+EcrLHAFPe5A4bgtw==}
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
+
+  '@tanstack/ai-client@0.9.1':
+    resolution: {integrity: sha512-8tiiICtn/FwUDpzAPwF7NOZpRXrln1iKGAlmZzFnQJK6eJXT5FJRig7rRqGC7RnkIhX/D3GG2IIOpyuPACuakg==}
+
+  '@tanstack/ai-event-client@0.3.0':
+    resolution: {integrity: sha512-rAXrgLgyxDszd1PVBWH4wpOyP89QpKLY6oAg8eBx44hVhEpkCM50AaoiDtrPCmxMjrucBz9OMkAU2Khb7EaZ6g==}
+    peerDependencies:
+      '@tanstack/ai': 0.16.0
+
+  '@tanstack/ai-react@0.8.2':
+    resolution: {integrity: sha512-acDbBoWn85cnD2P2j2qXuapd8mVQwtCpkqzbjELThEc4ipMjqg3efzbCd6+KkhulAbCDQs7j6CGDxakbR9EoHw==}
+    peerDependencies:
+      '@tanstack/ai': ^0.16.0
+      '@types/react': '>=18.0.0'
+      react: '>=18.0.0'
+
+  '@tanstack/ai@0.16.0':
+    resolution: {integrity: sha512-EsMGoMp9Y/H3A4JkhZZhfqk6S8bUxVcoJZhJea2omJtyv58YjcLlqBQFKYx+64egkYOgoORDyxj6bNI6Ne7dcA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.9.0'
+    peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
+
+  '@tanstack/devtools-event-client@0.4.3':
+    resolution: {integrity: sha512-OZI6QyULw0FI0wjgmeYzCIfbgPsOEzwJtCpa69XrfLMtNXLGnz3d/dIabk7frg0TmHo+Ah49w5I4KC7Tufwsvw==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@testing-library/jest-dom@6.9.1':
     resolution: {integrity: sha512-zIcONa+hVtVSSep9UT3jZ5rizo2BsxgyDYU7WFD5eICBE7no3881HGeb/QkGfsJs6JTkY1aQhT7rIPC7e+0nnA==}
@@ -1987,6 +2022,9 @@ packages:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
 
+  partial-json@0.1.7:
+    resolution: {integrity: sha512-Njv/59hHaokb/hRUjce3Hdv12wd60MtM9Z5Olmn+nehe0QDAsRtRbJPvJ0Z91TusF0SuZRIvnM+S4l6EIP8leA==}
+
   path-browserify@1.0.1:
     resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
 
@@ -2648,6 +2686,10 @@ snapshots:
 
   '@adobe/css-tools@4.4.4': {}
 
+  '@ag-ui/core@0.0.49':
+    dependencies:
+      zod: 3.25.76
+
   '@asamuzakjp/css-color@5.1.11':
     dependencies:
       '@asamuzakjp/generational-cache': 1.0.1
@@ -3267,6 +3309,35 @@ snapshots:
       '@tailwindcss/oxide': 4.2.4
       tailwindcss: 4.2.4
       vite: 8.0.11(@types/node@24.12.3)(jiti@2.7.0)
+
+  '@tanstack/ai-client@0.9.1':
+    dependencies:
+      '@tanstack/ai': 0.16.0
+      '@tanstack/ai-event-client': 0.3.0(@tanstack/ai@0.16.0)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
+  '@tanstack/ai-event-client@0.3.0(@tanstack/ai@0.16.0)':
+    dependencies:
+      '@tanstack/ai': 0.16.0
+      '@tanstack/devtools-event-client': 0.4.3
+
+  '@tanstack/ai-react@0.8.2(@tanstack/ai@0.16.0)(@types/react@19.2.14)(react@19.2.6)':
+    dependencies:
+      '@tanstack/ai': 0.16.0
+      '@tanstack/ai-client': 0.9.1
+      '@types/react': 19.2.14
+      react: 19.2.6
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
+  '@tanstack/ai@0.16.0':
+    dependencies:
+      '@ag-ui/core': 0.0.49
+      '@tanstack/ai-event-client': 0.3.0(@tanstack/ai@0.16.0)
+      partial-json: 0.1.7
+
+  '@tanstack/devtools-event-client@0.4.3': {}
 
   '@testing-library/jest-dom@6.9.1':
     dependencies:
@@ -4476,6 +4547,8 @@ snapshots:
       entities: 8.0.0
 
   parseurl@1.3.3: {}
+
+  partial-json@0.1.7: {}
 
   path-browserify@1.0.1: {}
 

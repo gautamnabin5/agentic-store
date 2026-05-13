@@ -14,6 +14,7 @@
     "@base-ui/react": "^1.4.1",
     "@fontsource-variable/geist": "^5.2.8",
     "@hookform/resolvers": "^5.2.2",
+    "@tanstack/ai-react": "^0.8.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.14.0",
@@ -28,7 +29,9 @@
     "zustand": "^5.0.13"
   },
   "pnpm": {
-    "ignoredBuiltDependencies": ["msw"]
+    "ignoredBuiltDependencies": [
+      "msw"
+    ]
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
