@@ -11,6 +11,7 @@ import com.agenticstore.repository.ProductRepository;
 import com.agenticstore.repository.UserRepository;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -133,6 +134,7 @@ public class OrderService {
         description = "List all orders across all users (admin use)",
         annotations = @McpTool.McpAnnotations(readOnlyHint = true, openWorldHint = false)
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional(readOnly = true)
     public List<OrderResponse> listAll() {
         return orderRepository.findAll().stream()
@@ -145,6 +147,7 @@ public class OrderService {
         description = "Get any order by ID regardless of which user placed it (admin use)",
         annotations = @McpTool.McpAnnotations(readOnlyHint = true, idempotentHint = true, openWorldHint = false)
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional(readOnly = true)
     public Result<OrderResponse> getAny(
             @McpToolParam(description = "UUID of the order to retrieve") UUID orderId) {

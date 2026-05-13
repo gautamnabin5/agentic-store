@@ -8,6 +8,7 @@ import com.agenticstore.repository.ProductRepository;
 
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +54,7 @@ public class ProductService {
         description = "Create a new product in the store",
         annotations = @McpTool.McpAnnotations(destructiveHint = false, openWorldHint = false)
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public Result<ProductResponse> create(
             @McpToolParam(description = "Product details: name, description, price, and stock quantity") ProductRequest request) {
@@ -71,6 +73,7 @@ public class ProductService {
         description = "Update an existing product's name, description, price, or stock quantity",
         annotations = @McpTool.McpAnnotations(destructiveHint = false, idempotentHint = true, openWorldHint = false)
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public Result<ProductResponse> update(
             @McpToolParam(description = "UUID of the product to update") UUID id,
@@ -92,6 +95,7 @@ public class ProductService {
         description = "Soft-delete a product by ID, making it inactive and hidden from the store",
         annotations = @McpTool.McpAnnotations(destructiveHint = true, openWorldHint = false)
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public Result<Void> softDelete(
             @McpToolParam(description = "UUID of the product to delete") UUID id) {
