@@ -1,4 +1,5 @@
 import jwt as pyjwt
+from typing import Any
 from config import settings
 
 ADMIN_ONLY_TOOLS = {
@@ -17,7 +18,7 @@ def decode_jwt(token: str) -> dict:
     return pyjwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
 
 
-def filter_tools_for_role(tools: list, role: str) -> list:
+def filter_tools_for_role(tools: list[Any], role: str) -> list[Any]:
     if role == "ADMIN":
         return tools
     return [t for t in tools if t.name not in ADMIN_ONLY_TOOLS]
@@ -31,8 +32,8 @@ def store_session(session_id: str, data: dict) -> None:
     _sessions[session_id] = data
 
 
-async def bootstrap_session(session_id: str, jwt: str, session_service) -> dict:
-    """Create MCPToolset, filter tools, build agent+runner, cache in _sessions."""
+async def bootstrap_session(session_id: str, jwt: str, session_service: Any) -> dict:
+    """Bootstrap a new session: decode JWT, connect MCP, filter tools, build runner. Raises jwt.InvalidTokenError on bad token."""
     from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
     from mcp import SseServerParams
     from agent import build_agent
