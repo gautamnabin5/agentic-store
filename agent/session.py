@@ -1,6 +1,9 @@
+import logging
 import jwt as pyjwt
 from typing import Any
 from config import settings
+
+log = logging.getLogger(__name__)
 
 ADMIN_ONLY_TOOLS = {
     "list_all_orders",
@@ -39,6 +42,7 @@ async def bootstrap_session(session_id: str, jwt: str, session_service: Any) -> 
     from agent import build_agent
     from google.adk.runners import Runner
 
+    log.info("bootstrap_session start session_id=%s", session_id)
     payload = decode_jwt(jwt)
     user_id: str = payload["sub"]
     role: str = payload["role"]
@@ -49,8 +53,11 @@ async def bootstrap_session(session_id: str, jwt: str, session_service: Any) -> 
             headers={"Authorization": f"Bearer {jwt}"},
         )
     )
-    all_tools = await toolset.get_tools_async()
+    log.info("fetching MCP tools from %s", settings.backend_mcp_url)
+    all_tools = await toolset.get_tools()
+    log.info("MCP tools fetched: %s", [t.name for t in all_tools])
     filtered = filter_tools_for_role(all_tools, role)
+    log.info("filtered tools for role %s: %s", role, [t.name for t in filtered])
 
     agent = build_agent(role=role, user_id=user_id, tools=filtered)
     runner = Runner(agent=agent, app_name="agentic-store", session_service=session_service)
@@ -62,6 +69,7 @@ async def bootstrap_session(session_id: str, jwt: str, session_service: Any) -> 
         state={"user_id": user_id, "role": role, "confirmed": False},
     )
 
+    log.info("bootstrap_session complete session_id=%s", session_id)
     session_data = {"runner": runner, "user_id": user_id, "role": role}
     store_session(session_id, session_data)
     return session_data
