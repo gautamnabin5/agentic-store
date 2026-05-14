@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     litellm_base_url: str = "http://10.0.0.32:4000"
     litellm_api_key: str = "dummy"
     litellm_model: str = "smart"
-    backend_mcp_url: str = "http://backend:8080/mcp/sse"
+    backend_mcp_url: str = "http://backend:8080/sse"
     jwt_secret: str
     cors_allowed_origins: str = "http://localhost:5173,http://localhost"
 

@@ -33,10 +33,11 @@ def build_agent(role: str, user_id: str, tools: list) -> LlmAgent:
         model=f"openai/{settings.litellm_model}",
         api_base=settings.litellm_base_url,
         api_key=settings.litellm_api_key,
+        no_cache=True,
     )
 
     return LlmAgent(
-        name="store-agent",
+        name="store_agent",
         model=model,
         instruction=instruction,
         tools=tools,
